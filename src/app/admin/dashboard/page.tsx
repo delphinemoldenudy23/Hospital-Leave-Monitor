@@ -64,15 +64,17 @@ export default function AdminDashboard() {
     fetchDashboard();
 
     const socket = getSocket();
-    
-    // Ensure admin joins the room
-    if (socket.connected) {
-      socket.emit('join-admin-room');
-    } else {
-      socket.on('connect', () => {
-        socket.emit('join-admin-room');
-      });
-    }
+
+if (!socket) return;
+
+// Ensure admin joins the room
+if (socket.connected) {
+  socket.emit('join-admin-room');
+} else {
+  socket.on('connect', () => {
+    socket.emit('join-admin-room');
+  });
+}
 
     let debounceTimer: NodeJS.Timeout;
     
