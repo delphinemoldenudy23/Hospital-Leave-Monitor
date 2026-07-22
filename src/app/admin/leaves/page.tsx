@@ -44,14 +44,14 @@ export default function LeavesPage() {
 
     let debounceTimer: NodeJS.Timeout;
     
-    const handleNewLeave = (data) => {
+    const handleNewLeave = (data: any) => {
       console.log('New leave request received:', data);
       // Debounce to prevent rapid successive calls
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => fetchLeaves(), 300);
     };
     
-    const handleUpdate = (data) => {
+    const handleUpdate = (data: any) => {
       console.log('Leave request updated:', data);
       // Debounce to prevent rapid successive calls
       clearTimeout(debounceTimer);

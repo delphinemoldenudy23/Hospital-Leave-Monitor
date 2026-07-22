@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, memo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
@@ -9,6 +9,43 @@ import {
   LogOut, Menu, X, ChevronDown, Search, Bell as BellIcon, User, Settings,
   ArrowRight, Clock, AlertCircle, Trash2, MessageSquare, Shield, Sparkles
 } from 'lucide-react';
+
+// Memoized navigation item component
+const NavItem = memo(({ 
+  href, 
+  label, 
+  icon: Icon, 
+  isActive, 
+  collapsed, 
+  onClick,
+  className = '',
+  prefetch = false
+}: {
+  href: string;
+  label: string;
+  icon: any;
+  isActive: boolean;
+  collapsed: boolean;
+  onClick?: () => void;
+  className?: string;
+  prefetch?: boolean;
+}) => (
+  <Link
+    href={href}
+    prefetch={prefetch}
+    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 ${
+      isActive
+        ? 'bg-blue-600 text-white shadow-lg'
+        : 'text-slate-300 hover:bg-slate-800 hover:text-white active:scale-95'
+    } ${className}`}
+    onClick={onClick}
+  >
+    <Icon className={`w-5 h-5 flex-shrink-0 ${collapsed ? 'mx-auto' : ''}`} />
+    {!collapsed && <span className="font-medium">{label}</span>}
+  </Link>
+));
+
+NavItem.displayName = 'NavItem';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -21,6 +58,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [userRole, setUserRole] = useState<string>('');
 
   const { notifications, isConnected, clearNotifications } = useRealTimeNotifications();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
+    router.push('/admin/login');
+  };
+
+  const navItems = useMemo(() => [
+    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/employees', label: 'Employees', icon: Users },
+    { href: '/admin/leaves', label: 'Leave Requests', icon: Calendar },
+    { href: '/admin/holidays', label: 'Holidays', icon: Sparkles },
+    { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { href: '/admin/departments', label: 'Departments', icon: Building2 },
+    { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
+    { href: '/admin/notifications', label: 'Notifications', icon: Bell },
+    { href: '/admin/help-center', label: 'Help Center', icon: MessageSquare },
+  ], []);
+
+  const generalAdminOnlyNavItems = useMemo(() => [
+    { href: '/admin/admin-management', label: 'Admin Management', icon: Shield },
+    { href: '/admin/trash', label: 'Trash', icon: Trash2 },
+  ], []);
+
+  const secondaryNavItems = useMemo(() => [
+    { href: '/admin/profile', label: 'Profile', icon: User },
+    { href: '/admin/settings', label: 'Settings', icon: Settings },
+  ], []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -52,35 +118,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
     );
   }
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userId');
-    router.push('/admin/login');
-  };
-
-  const navItems = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/employees', label: 'Employees', icon: Users },
-    { href: '/admin/leaves', label: 'Leave Requests', icon: Calendar },
-    { href: '/admin/holidays', label: 'Holidays', icon: Sparkles },
-    { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-    { href: '/admin/departments', label: 'Departments', icon: Building2 },
-    { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
-    { href: '/admin/notifications', label: 'Notifications', icon: Bell },
-    { href: '/admin/help-center', label: 'Help Center', icon: MessageSquare },
-  ];
-
-  const generalAdminOnlyNavItems = [
-    { href: '/admin/admin-management', label: 'Admin Management', icon: Shield },
-    { href: '/admin/trash', label: 'Trash', icon: Trash2 },
-  ];
-
-  const secondaryNavItems = [
-    { href: '/admin/profile', label: 'Profile', icon: User },
-    { href: '/admin/settings', label: 'Settings', icon: Settings },
-  ];
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -126,22 +163,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-1">
                 {navItems.map((item) => {
                   const isActive = pathname.startsWith(item.href) || (pathname === '/admin/dashboard' && item.href === '/admin/dashboard');
-                  const Icon = item.icon;
+                  // Only prefetch dashboard and employees (most used)
+                  const shouldPrefetch = item.href === '/admin/dashboard' || item.href === '/admin/employees';
                   return (
-                    <Link
+                    <NavItem
                       key={item.href}
                       href={item.href}
-                      prefetch={true}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 ${
-                        isActive
-                          ? 'bg-blue-600 text-white shadow-lg'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white active:scale-95'
-                      }`}
+                      label={item.label}
+                      icon={item.icon}
+                      isActive={isActive}
+                      collapsed={sidebarCollapsed}
                       onClick={() => setSidebarOpen(false)}
-                    >
-                      <Icon className={`w-5 h-5 flex-shrink-0 ${sidebarCollapsed ? 'mx-auto' : ''}`} />
-                      {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
-                    </Link>
+                      prefetch={shouldPrefetch}
+                    />
                   );
                 })}
               </div>
@@ -157,40 +191,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="space-y-1">
                 {userRole === 'generalAdmin' && generalAdminOnlyNavItems.map((item) => {
                   const isActive = pathname === item.href;
-                  const Icon = item.icon;
                   return (
-                    <Link
+                    <NavItem
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? 'bg-purple-600 text-white shadow-lg'
-                          : 'text-purple-300 hover:bg-purple-900/50 hover:text-white'
-                      }`}
+                      label={item.label}
+                      icon={item.icon}
+                      isActive={isActive}
+                      collapsed={sidebarCollapsed}
                       onClick={() => setSidebarOpen(false)}
-                    >
-                      <Icon className={`w-5 h-5 flex-shrink-0 ${sidebarCollapsed ? 'mx-auto' : ''}`} />
-                      {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
-                    </Link>
+                      className={isActive ? 'bg-purple-600 text-white shadow-lg' : 'text-purple-300 hover:bg-purple-900/50 hover:text-white'}
+                    />
                   );
                 })}
                 {secondaryNavItems.map((item) => {
                   const isActive = pathname === item.href;
-                  const Icon = item.icon;
                   return (
-                    <Link
+                    <NavItem
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? 'bg-blue-600 text-white shadow-lg'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }`}
+                      label={item.label}
+                      icon={item.icon}
+                      isActive={isActive}
+                      collapsed={sidebarCollapsed}
                       onClick={() => setSidebarOpen(false)}
-                    >
-                      <Icon className={`w-5 h-5 flex-shrink-0 ${sidebarCollapsed ? 'mx-auto' : ''}`} />
-                      {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
-                    </Link>
+                    />
                   );
                 })}
               </div>
@@ -286,13 +311,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg animate-pulse">
                             <Bell className="w-5 h-5 text-blue-600 mt-0.5" />
                             <div>
-                              <p className="text-sm font-medium text-slate-900">
-                                {notif.action ? `Leave request ${notif.action}` : 'New leave request'}
-                              </p>
-                              <p className="text-xs text-slate-600">
-                                {notif.leaveRequest?.employeeId?.name || 'Employee'} - {notif.leaveRequest?.leaveType}
-                              </p>
-                            </div>
+  <p className="text-sm font-medium text-slate-900">
+    {"action" in notif
+      ? `Leave request ${notif.action}`
+      : "New leave request"}
+  </p>
+
+  <p className="text-xs text-slate-600">
+    {"leaveRequest" in notif && notif.leaveRequest
+      ? `${notif.leaveRequest.employeeId?.name || "Employee"} - ${notif.leaveRequest.leaveType}`
+      : "Holiday notification"}
+  </p>
+</div>
                           </div>
                         ))
                       )}

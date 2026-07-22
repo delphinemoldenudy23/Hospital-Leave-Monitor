@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, memo, useCallback } from 'react';
+import { useEffect, useState, memo, useCallback, lazy, Suspense } from 'react';
 import axios from '@/lib/axios';
 import Link from 'next/link';
 import { getSocket } from '@/lib/socket';
@@ -12,8 +12,8 @@ import {
   Users, CalendarOff, Clock, AlertTriangle, CheckCircle, TrendingUp,
   ArrowRight, MoreVertical, Bell, UserCheck, RefreshCw
 } from 'lucide-react';
-import HolidayCalendar from '@/components/HolidayCalendar';
-import ResetStatsModal from '@/components/ResetStatsModal';
+const HolidayCalendar = lazy(() => import('@/components/HolidayCalendar'));
+const ResetStatsModal = lazy(() => import('@/components/ResetStatsModal'));
 
 interface DashboardData {
   totalEmployees: number;
@@ -26,23 +26,23 @@ interface DashboardData {
   leaveByType: { _id: string; count: number }[];
   monthlyStats: { _id: string; count: number }[];
   recentLeaves: {
-    _id: string;
-    employeeId?: { name: string; department: string };
-    leaveType: string;
-    status: string;
-    startDate: string;
-    expectedReturnDate: string;
-    createdAt: string;
-  }[];
-  recentActivities?: {
-    _id: string;
-    type: string;
-    description: string;
-    timestamp: string;
-    employeeId?: { name: string };
-  }[];
+  _id: string;
+  employeeId?: { name: string; department: string };
+  leaveType: string;
+  status: string;
+  startDate: string;
+  expectedReturnDate: string;
+  duration: number;
+  createdAt: string;
+}[];
+recentActivities?: {
+  _id: string;
+  type: string;
+  description: string;
+  timestamp: string;
+  employeeId?: { name: string };
+}[];
 }
-
 export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,14 +76,14 @@ export default function AdminDashboard() {
 
     let debounceTimer: NodeJS.Timeout;
     
-    const handleNewLeave = (data) => {
+    const handleNewLeave = (data: any) => {
       console.log('New leave request received:', data);
       // Debounce to prevent rapid successive calls
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => fetchDashboard(), 300);
     };
     
-    const handleUpdate = (data) => {
+    const handleUpdate = (data: any) => {
       console.log('Leave request updated:', data);
       // Debounce to prevent rapid successive calls
       clearTimeout(debounceTimer);
@@ -359,7 +359,13 @@ export default function AdminDashboard() {
 
         {/* Holiday Calendar */}
         <div>
-          <HolidayCalendar isAdmin={true} />
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          }>
+            <HolidayCalendar isAdmin={true} />
+          </Suspense>
         </div>
       </div>
 
@@ -442,13 +448,15 @@ export default function AdminDashboard() {
       </div>
 
       {/* Reset Stats Modal */}
-      <ResetStatsModal
-        isOpen={showResetModal}
-        onClose={() => setShowResetModal(false)}
-        onSuccess={() => {
+      <Suspense fallback={null}>
+        <ResetStatsModal
+          isOpen={showResetModal}
+          onClose={() => setShowResetModal(false)}
+          onSuccess={() => {
           fetchDashboard();
         }}
       />
+      </Suspense>
     </div>
   );
 }
