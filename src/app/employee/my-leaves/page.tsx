@@ -25,6 +25,7 @@ export default function MyLeavesPage() {
   useEffect(() => {
     fetchLeaves();
     const socket = getSocket();
+    if (!socket) return;
     socket.on('leave-status-updated', fetchLeaves);
     return () => { socket.off('leave-status-updated', fetchLeaves); };
   }, []);

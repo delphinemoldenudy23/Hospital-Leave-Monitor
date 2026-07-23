@@ -31,16 +31,20 @@ export default function LeavesPage() {
     fetchSystemSettings();
     setUserRole(localStorage.getItem('role') || '');
 
-    const socket = getSocket();
-    
-    // Ensure admin joins the room
-    if (socket.connected) {
-      socket.emit('join-admin-room');
-    } else {
-      socket.on('connect', () => {
-        socket.emit('join-admin-room');
-      });
-    }
+   const socket = getSocket();
+
+if (!socket) {
+  return;
+}
+
+// Ensure admin joins the room
+if (socket.connected) {
+  socket.emit('join-admin-room');
+} else {
+  socket.on('connect', () => {
+    socket.emit('join-admin-room');
+  });
+}
 
     let debounceTimer: NodeJS.Timeout;
     

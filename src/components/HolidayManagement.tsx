@@ -55,6 +55,7 @@ export default function HolidayManagement() {
   // Setup socket connection for real-time updates
   useEffect(() => {
     const socket = getSocket();
+    if (!socket) return;
     
     // Listen for holiday changes from other admins
     socket.on('holiday-created', (holiday: Holiday) => {

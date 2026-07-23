@@ -46,6 +46,7 @@ export const useRealTimeNotifications = () => {
 
   useEffect(() => {
     const socket = getSocket();
+    if (!socket) return;
 
     const handleConnect = () => {
       setIsConnected(true);

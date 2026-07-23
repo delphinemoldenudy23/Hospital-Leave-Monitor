@@ -54,6 +54,7 @@ export default function HolidayCalendar({ isAdmin = false, onHolidayClick }: Hol
   // Setup socket connection for real-time updates
   useEffect(() => {
     const socket = getSocket();
+    if (!socket) return;
     
     // Listen for holiday changes
     socket.on('holiday-created', (holiday: Holiday) => {

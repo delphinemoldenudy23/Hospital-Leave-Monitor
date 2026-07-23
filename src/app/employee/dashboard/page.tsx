@@ -100,6 +100,8 @@ export default function EmployeeDashboard() {
     fetchEmployeeDashboard();
 
     const socket = getSocket();
+    if (!socket) return;
+    
     let debounceTimer: NodeJS.Timeout;
     
     const handleStatusUpdate = () => {

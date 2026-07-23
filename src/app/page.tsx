@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Menu, X, Calendar, CheckCircle, Bell, ArrowRight, Building2, LogIn, UserPlus, Shield, Clock, FileText } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

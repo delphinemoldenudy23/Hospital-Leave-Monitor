@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Calendar, LogIn, ArrowRight, Building2, Mail, Lock, Eye, EyeOff, Shield } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -33,6 +33,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
   useEffect(() => {
     if (!isLoading && employeeId) {
       const socket = getSocket();
+      if (!socket) return;
 
       socket.on('connect', () => {
         socket.emit('join-employee-room', employeeId);

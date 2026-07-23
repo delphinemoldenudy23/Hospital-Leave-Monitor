@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Calendar, UserPlus, Building2, ArrowRight } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: '',
