@@ -172,42 +172,58 @@ The frontend will run on `http://localhost:3000`
 
 ## Production Deployment
 
-### Backend Production Setup
+### Backend Production Setup (Railway)
 
-1. Update `Backend/.env` with production values:
-```
-MONGODB_URI=your-production-mongodb-uri
-PORT=5001
-JWT_SECRET=your-secure-jwt-secret
-```
+1. **Deploy Backend to Railway:**
+   - Create a new Railway project
+   - Connect your GitHub repository
+   - Railway will detect the Node.js backend in the `Backend/` folder
+   - Set the root directory to `Backend` in Railway settings
 
-2. Build and start:
-```bash
-cd Backend
-npm install --production
-npm start
-```
+2. **Set Railway Environment Variables:**
+   ```
+   MONGODB_URI=your-mongodb-atlas-connection-string
+   PORT=5001
+   JWT_SECRET=your-secure-jwt-secret-change-this
+   ALLOWED_ORIGINS=https://your-vercel-app.vercel.app
+   ```
 
-### Frontend Production Setup
+3. **MongoDB Atlas Setup:**
+   - Create a free MongoDB Atlas account
+   - Create a cluster
+   - Create a database user with read/write permissions
+   - Whitelist Railway's IP addresses (or use 0.0.0.0/0 for testing)
+   - Copy the connection string (use the Node.js driver format)
 
-1. Update `Frontend/.env.local`:
-```
-NEXT_PUBLIC_API_URL=https://your-backend-api.com/api
-```
+4. **Get Railway Backend URL:**
+   - After deployment, Railway will provide a URL like: `https://your-app-name.up.railway.app`
+   - Note: The API routes will be at `https://your-app-name.up.railway.app/api`
 
-2. Build the application:
-```bash
-cd Frontend
-npm run build
-npm start
-```
+### Frontend Production Setup (Vercel)
+
+1. **Deploy Frontend to Vercel:**
+   - Create a new Vercel project
+   - Connect your GitHub repository
+   - Vercel will detect the Next.js app
+   - Click Deploy
+
+2. **Set Vercel Environment Variables:**
+   Go to your Vercel project Settings > Environment Variables and add:
+   ```
+   NEXT_PUBLIC_API_URL=https://your-railway-app.up.railway.app/api
+   NEXT_PUBLIC_SOCKET_URL=https://your-railway-app.up.railway.app
+   ```
+
+3. **Redeploy:**
+   - After setting environment variables, trigger a new deployment from Vercel dashboard
 
 ### Deployment Options
 
-#### Option 1: Vercel (Frontend) + Render/Railway (Backend)
+#### Option 1: Vercel (Frontend) + Railway (Backend) - RECOMMENDED
 - Deploy frontend to Vercel
-- Deploy backend to Render or Railway
-- Update frontend API URL to point to backend URL
+- Deploy backend to Railway
+- Set NEXT_PUBLIC_API_URL and NEXT_PUBLIC_SOCKET_URL in Vercel to point to Railway URL
+- Set ALLOWED_ORIGINS in Railway to include your Vercel domain
 
 #### Option 2: Single Server
 - Build frontend: `npm run build` in Frontend
@@ -218,6 +234,18 @@ npm start
 - Create Dockerfile for both frontend and backend
 - Use docker-compose to orchestrate services
 - Deploy to any cloud provider
+
+### Critical Environment Variables for Production
+
+**Frontend (Vercel):**
+- `NEXT_PUBLIC_API_URL` - Your Railway backend URL with `/api` suffix
+- `NEXT_PUBLIC_SOCKET_URL` - Your Railway backend URL (no `/api` suffix)
+
+**Backend (Railway):**
+- `MONGODB_URI` - MongoDB Atlas connection string
+- `PORT` - Server port (default: 5001)
+- `JWT_SECRET` - Secure random string for JWT signing
+- `ALLOWED_ORIGINS` - Comma-separated list of allowed frontend domains (e.g., `https://your-app.vercel.app`)
 
 ## Security Considerations
 

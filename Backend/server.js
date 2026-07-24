@@ -20,9 +20,13 @@ const app = express();
 const httpServer = createServer(app);
 
 // Socket.io setup
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002'];
+
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });
@@ -53,7 +57,11 @@ io.on('connection', (socket) => {
 });
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
