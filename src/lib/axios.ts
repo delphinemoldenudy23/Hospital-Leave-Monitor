@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL_PROD ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'http://localhost:5001/api';
 
 // Simple in-memory cache with size limit
 const cache = new Map<string, { data: any; timestamp: number }>();
