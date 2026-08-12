@@ -1,7 +1,7 @@
 const Holiday = require('../models/Holiday');
 const Notification = require('../models/Notification');
 const Employee = require('../models/Employee');
-const User = require('../models/User');
+const User = require('../models/user');
 
 const getAllHolidays = async (req, res) => {
   try {
