@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
-const User = require('../models/user');
+const User = require('../models/User');
 const Employee = require('../models/Employee');
 
 // Configure multer for profile picture uploads
