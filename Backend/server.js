@@ -24,9 +24,13 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',') 
   : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002'];
 
+// In production, allow all origins to support any Vercel deployment
+const isProduction = process.env.NODE_ENV === 'production';
+const corsOrigin = isProduction ? '*' : allowedOrigins;
+
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: corsOrigin,
     methods: ['GET', 'POST']
   }
 });
@@ -58,7 +62,7 @@ io.on('connection', (socket) => {
 
 // Middleware
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: corsOrigin,
   credentials: true
 };
 app.use(cors(corsOptions));

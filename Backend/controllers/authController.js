@@ -34,7 +34,7 @@ const upload = multer({
 
 const register = async (req, res) => {
   try {
-    const { email, password, role, staffId, name, department, position, phoneNumber } = req.body;
+    const { email, password, staffId, name, department, position, phoneNumber } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -63,11 +63,11 @@ const register = async (req, res) => {
       }
     }
 
-    // Create user
+    // Create user - public registration always creates employee accounts only
     const user = new User({
       email,
       password: hashedPassword,
-      role: role || 'employee',
+      role: 'employee',
       employeeId: employee?._id
     });
 
