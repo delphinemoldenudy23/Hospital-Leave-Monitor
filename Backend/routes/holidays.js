@@ -7,12 +7,12 @@ const {
   updateHoliday,
   deleteHoliday
 } = require('../controllers/holidayController');
-const { auth, generalAdminAuth } = require('../middleware/auth');
+const { auth, adminAuth } = require('../middleware/auth');
 
 router.get('/', auth, getAllHolidays);
 router.get('/:id', auth, getHolidayById);
-router.post('/', generalAdminAuth, createHoliday);
-router.put('/:id', generalAdminAuth, updateHoliday);
-router.delete('/:id', generalAdminAuth, deleteHoliday);
+router.post('/', adminAuth, createHoliday);
+router.put('/:id', adminAuth, updateHoliday);
+router.delete('/:id', adminAuth, deleteHoliday);
 
 module.exports = router;
